@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreboard Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9;              
+    }
+        input, button { margin: 10px; padding: 10px; font-size: 16px; border-radius: 8px; border: 2px solid #8e24aa; }
+        table { width: 70%; margin: 20px auto; border-collapse: collapse; background-color: #fff; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); }
+        th, td { padding: 12px; border: 1px solid #888; text-align: center; font-weight: bold; font-size: 18px; }
+        th { background-color: #8e24aa; color: white; }
+        td { color: #4e342e; }
+        tr:nth-child(even) { background-color: #f3e5f5; }
+        tr:nth-child(odd) { background-color: #ffffff; }
+        tr:hover { background-color: #ba68c8; color: white; cursor: pointer; }
+        .link { margin-top: 20px; font-size: 18px; }
+        .link a { text-decoration: none; color: #8e24aa; font-weight: bold; }
+        button:hover { background-color: #7b1fa2; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 0%;
+            font-size: 40px;
+        }
+        .highlight {
+            color: red;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Tech<span class="highlight">X</span>plosion</h1>
+
+
+    <h2>Add Team</h2>
+    <input type="text" id="teamName" placeholder="Enter Team Name">
+    <input type="number" id="score" placeholder="Enter Score">
+    <button onclick="addTeam()">Add Team</button>
+
+    <h3>Current Teams</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Team Name</th>
+                <th>Score</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="teamList"></tbody>
+    </table>
+
+    <p class="link">
+        👉 <a href="scoreboard.html" target="_blank">View Score</a>
+    </p>
+
+    <script>
+        function addTeam() {
+            let teamName = document.getElementById("teamName").value;
+            let score = document.getElementById("score").value;
+
+            if (!teamName || !score) {
+                alert("Please fill all fields!");
+                return;
+            }
+
+            let teams = JSON.parse(localStorage.getItem("teams")) || [];
+            teams.push({ teamName, score: parseInt(score) });
+            localStorage.setItem("teams", JSON.stringify(teams));
+            displayTeams();
+        }
+
+        function displayTeams() {
+            let teams = JSON.parse(localStorage.getItem("teams")) || [];
+            let list = document.getElementById("teamList");
+            list.innerHTML = "";
+
+            // Alternate between two colors for the rows
+            teams.forEach((team, index) => {
+                let row = document.createElement("tr");
+                row.style.backgroundColor = (index % 2 === 0) ? "#f3e5f5" : "#ffffff";
+                row.innerHTML = `
+                    <td>${team.teamName}</td>
+                    <td>${team.score}</td>
+                    <td>
+                        <button onclick="removeTeam(${index})">Remove</button>
+                        <button onclick="updateScore(${index})">Update</button>
+                    </td>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function removeTeam(index) {
+            let teams = JSON.parse(localStorage.getItem("teams")) || [];
+            teams.splice(index, 1);  // Remove the team at the specified index
+            localStorage.setItem("teams", JSON.stringify(teams));
+            displayTeams();  // Refresh the display
+        }
+
+        function updateScore(index) {
+            let teams = JSON.parse(localStorage.getItem("teams")) || [];
+            let newScore = prompt("Enter new score for " + teams[index].teamName, teams[index].score);
+
+            if (newScore !== null && !isNaN(newScore) && newScore >= 0) {
+                teams[index].score = parseInt(newScore);
+                localStorage.setItem("teams", JSON.stringify(teams));
+                displayTeams();  // Refresh the display
+            } else {
+                alert("Please enter a valid score.");
+            }
+        }
+
+        displayTeams(); // Load teams on page load
+    </script>
+
+</body>
+</html>
