@@ -12,6 +12,7 @@
   "dependencies": {
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
+    "mongoose": "^8.9.6",
     "path": "^0.12.7",
     "socket.io": "^4.8.1",
     "socket.oi": "^0.0.1-security.8"

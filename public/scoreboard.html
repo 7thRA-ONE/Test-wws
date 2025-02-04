@@ -25,6 +25,16 @@
             font-family:Arial, Helvetica, sans-serif;
             font: size 50px;;
         }
+        .watermark {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        font-size: 16px;
+        color: rgba(0, 241, 221, 0.2); /* Light transparency */
+        font-weight: bold;
+        pointer-events: none; /* Prevent interaction */
+    }
+
     </style>
 </head>
 <body>
@@ -45,17 +55,22 @@
       <p class="link">
         🔙 <a href="vr1.html">Back to Admin</a>
     </p>
+    <div class="watermark">© Created by RYN</div>
     <script>
-        function displayTeams() {
-            let teams = JSON.parse(localStorage.getItem("teams")) || [];
+       async function displayTeams() {
+            let response=await fetch("/getPlayers") //JSON.parse(localStorage.getItem("teams")) || [];
             let list = document.getElementById("teamList");
             list.innerHTML = "";
 
+
+            var teams = await response.json()
+
+
             // Sort the teams by score in descending order
-            teams.sort((a, b) => b.score - a.score);
+            teams.data.sort((a, b) => b.score - a.score);
 
             // Add rank to each team and display them with alternating colors
-            teams.forEach((team, index) => {
+            teams.data.forEach((team, index) => {
                 let row = document.createElement("tr");
                 
                 // Alternate colors between two options: #f3e5f5 and #ffffff

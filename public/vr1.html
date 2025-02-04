@@ -56,7 +56,7 @@
     </p>
 
     <script>
-        function addTeam() {
+     async   function addTeam() {
             let teamName = document.getElementById("teamName").value;
             let score = document.getElementById("score").value;
 
@@ -65,19 +65,33 @@
                 return;
             }
 
+            let req = {
+                playerName: teamName,
+                score: score
+            };
+
+            let response = await fetch("/addPlayer", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(req)
+            });
+
             let teams = JSON.parse(localStorage.getItem("teams")) || [];
             teams.push({ teamName, score: parseInt(score) });
             localStorage.setItem("teams", JSON.stringify(teams));
             displayTeams();
         }
 
-        function displayTeams() {
-            let teams = JSON.parse(localStorage.getItem("teams")) || [];
+       async function displayTeams() {
+            let teams = await fetch("/getPlayers") //JSON.parse(localStorage.getItem("teams")) || [];
             let list = document.getElementById("teamList");
             list.innerHTML = "";
 
+            let t = await teams.json()
             // Alternate between two colors for the rows
-            teams.forEach((team, index) => {
+            t.data.forEach((team, index) => {
                 let row = document.createElement("tr");
                 row.style.backgroundColor = (index % 2 === 0) ? "#f3e5f5" : "#ffffff";
                 row.innerHTML = `
@@ -92,21 +106,64 @@
             });
         }
 
-        function removeTeam(index) {
-            let teams = JSON.parse(localStorage.getItem("teams")) || [];
-            teams.splice(index, 1);  // Remove the team at the specified index
-            localStorage.setItem("teams", JSON.stringify(teams));
+        async function  removeTeam(index) {
+            let response=await fetch("/getPlayers") 
+            let json_response = await response.json() || [];
+            var teams = json_response.data
+
+            console.log(teams[index].teamName)
+
+
+            let req = {
+                    playerName: teams[index].teamName,
+                    score: teams[index].score
+                }
+                let _delete = await fetch("/delPlayer",{
+                method:'POST',
+                headers: {
+                            "Content-Type": "application/json"
+                        },
+                body: JSON.stringify(req)
+            })
             displayTeams();  // Refresh the display
         }
 
-        function updateScore(index) {
-            let teams = JSON.parse(localStorage.getItem("teams")) || [];
-            let newScore = prompt("Enter new score for " + teams[index].teamName, teams[index].score);
+        async function updateScore(index) {
+            let response=await fetch("/getPlayers") 
+            let json_response = await response.json() || [];
+            var teams = json_response.data
 
+            let newScore = prompt("Enter new score for " + teams[index].teamName, teams[index].score);
+        
             if (newScore !== null && !isNaN(newScore) && newScore >= 0) {
                 teams[index].score = parseInt(newScore);
-                localStorage.setItem("teams", JSON.stringify(teams));
-                displayTeams();  // Refresh the display
+                
+                let req = {
+                    playerName: teams[index].teamName,
+                    score: teams[index].score
+                };
+        
+                try {
+                    let response = await fetch("/addPlayer", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(req)
+                    });
+        
+                    let result = await response.json();
+                    
+                    if (response.ok) {
+                        alert("Score updated successfully!");
+                        displayTeams(); // Refresh the display
+                    } else {
+                        alert("Error: " + result.message);
+                    }
+                } catch (error) {
+                    console.error("Error updating score:", error);
+                    alert("Failed to update score. Try again.");
+                }
             } else {
                 alert("Please enter a valid score.");
             }
